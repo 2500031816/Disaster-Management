@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disaster Management System - SDC Review 1</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    color: #222;
+    line-height: 1.5;
+}
+
+button, input, select, textarea { font: inherit; }
+
+.hidden { display: none !important; }
+
+/* AUTH */
+#authPage {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+    background: linear-gradient(135deg, #d32f2f, #1565c0);
+}
+
+.auth-box {
+    width: 390px;
+    max-width: 100%;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+}
+
+.auth-box h1 { text-align: center; color: #d32f2f; margin-bottom: 5px; }
+.auth-box .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+
+.auth-box input, .auth-box select {
+    width: 100%;
+    padding: 12px;
+    margin: 7px 0;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+}
+
+.btn {
+    border: 0;
+    border-radius: 7px;
+    padding: 11px 16px;
+    cursor: pointer;
+    color: white;
+    background: #1565c0;
+    margin-top: 8px;
+}
+
+.btn:hover { opacity: .9; }
+.btn-danger { background: #d32f2f; }
+.btn-success { background: #2e7d32; }
+.btn-dark { background: #333; }
+
+.auth-box .btn { width: 100%; }
+.auth-switch { text-align: center; margin-top: 15px; }
+.auth-switch a { color: #1565c0; cursor: pointer; font-weight: bold; }
+.message { margin-top: 10px; text-align: center; font-weight: bold; }
+
+/* APP */
+header {
+    background: #b71c1c;
+    color: white;
+    padding: 16px 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.logo { font-size: 22px; font-weight: bold; }
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info span { font-size: 14px; }
+
+nav {
+    background: #fff;
+    padding: 10px 5%;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+nav button {
+    border: 0;
+    background: transparent;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+nav button:hover, nav button.active {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+main { width: 90%; max-width: 1200px; margin: 25px auto; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.hero {
+    background: white;
+    padding: 35px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
+
+.hero h1 { color: #b71c1c; margin-bottom: 8px; }
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
+
+.stat-card { text-align: center; }
+.stat-card h2 { font-size: 30px; color: #1565c0; }
+
+.section-title {
+    margin: 20px 0 12px;
+    color: #333;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+}
+
+textarea { min-height: 100px; resize: vertical; }
+
+.table-wrap { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th { background: #1565c0; color: white; }
+
+.status {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 15px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.available { background: #c8e6c9; color: #1b5e20; }
+.limited { background: #fff3cd; color: #856404; }
+.deployed { background: #ffcdd2; color: #b71c1c; }
+
+.volunteer-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.volunteer-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,.08);
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.admin-card {
+    background: white;
+    padding: 20px;
+    border-left: 5px solid #d32f2f;
+    border-radius: 10px;
+}
+
+.alert {
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 7px;
+    background: #fff3cd;
+    border-left: 5px solid #ff9800;
+}
+
+.response-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.response-item {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #1565c0;
+    box-shadow: 0 2px 7px rgba(0,0,0,.06);
+}
+
+footer {
+    margin-top: 40px;
+    background: #17202a;
+    color: #fff;
+    padding: 30px 5% 15px;
+}
+
+.footer-grid {
+    max-width: 1200px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr;
+    gap: 30px;
+}
+
+.footer-grid h3 {
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.footer-grid h4 {
+    margin-bottom: 10px;
+    color: #90caf9;
+}
+
+.footer-grid p {
+    color: #d7dde3;
+    margin: 5px 0;
+}
+
+.footer-grid button {
+    display: block;
+    border: 0;
+    background: transparent;
+    color: #d7dde3;
+    padding: 4px 0;
+    cursor: pointer;
+    text-align: left;
+}
+
+.footer-grid button:hover {
+    color: #90caf9;
+}
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 25px auto 0;
+    padding-top: 15px;
+    border-top: 1px solid #45515c;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    color: #bfc7ce;
+    font-size: 13px;
+}
+
+@media (max-width: 600px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+    .volunteer-grid, .admin-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 600px) {
+    .dashboard-grid, .form-grid, .volunteer-grid, .admin-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-group.full { grid-column: auto; }
+    main { width: 94%; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH MODULE ================= -->
+<div id="authPage">
+    <div class="auth-box">
+
+        <div id="signupBox">
+            <h1>Disaster Management</h1>
+            
+            <h2>Create Account</h2>
+
+            <input type="text" id="signupName" placeholder="Full Name">
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="password" id="signupPassword" placeholder="Password">
+
+            <select id="signupRole">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <button class="btn btn-danger" onclick="signup()">Sign Up</button>
+            <div id="signupMessage" class="message"></div>
+
+            <div class="auth-switch">
+                Already registered?
+                <a onclick="showLogin()">Login</a>
+            </div>
+        </div>
+
+        <div id="loginBox" class="hidden">
+            <h1>Welcome Back</h1>
+            <p class="subtitle">Login to Disaster Management System</p>
+
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Password">
+
+            <button class="btn btn-success" onclick="login()">Login</button>
+            <div id="loginMessage" class="message"></div>
+
+            <div class="auth-switch">
+                New user?
+                <a onclick="showSignup()">Create Account</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= MAIN APPLICATION ================= -->
+<div id="appPage" class="hidden">
+
+<header>
+    <div class="logo">🚨 Disaster Management System</div>
+    <div class="user-info">
+        <span id="loggedUser"></span>
+        <span id="loggedRole"></span>
+        <button class="btn btn-dark" onclick="logout()">Logout</button>
+    </div>
+</header>
+
+<nav id="navigation"></nav>
+
+<main>
+
+    <!-- HOME / USER DASHBOARD -->
+    <section id="homePage" class="page active">
+        <div class="hero">
+            <h1>Emergency Management Dashboard</h1>
+            <p>Coordinate incidents, resources and volunteers during disaster situations.</p>
+            <button class="btn btn-danger" onclick="showPage('reportPage')">Report Emergency</button>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card stat-card">
+                <h2 id="incidentCount">0</h2>
+                <p>Active Incidents</p>
+            </div>
+            <div class="card stat-card">
+                <h2 id="affectedCount">12</h2>
+                <p>Affected Areas</p>
+            </div>
+            <div class="card stat-card">
+                <h2 id="volunteerCount">156</h2>
+                <p>Volunteers</p>
+            </div>
+            <div class="card stat-card">
+                <h2>85%</h2>
+                <p>Relief Completed</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Emergency Alerts</h2>
+            <div class="alert">⚠️ Flood warning: Stay away from low-lying areas.</div>
+            <div class="alert">🏥 Emergency shelter available at Relief Center A.</div>
+            <div class="alert">🚑 Rescue operation active in affected zones.</div>
+        </div>
+    </section>
+
+    <!-- USER MODULE: INCIDENT -->
+    <section id="reportPage" class="page">
+        <div class="card">
+            <h2>👤 User Module - Incident Reporting</h2>
+            <p>Users can report disaster incidents to the system.</p>
+
+            <form id="incidentForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Incident Type</label>
+                        <select id="incidentType" required>
+                            <option value="">Select Type</option>
+                            <option>Flood</option>
+                            <option>Earthquake</option>
+                            <option>Fire</option>
+                            <option>Cyclone</option>
+                            <option>Landslide</option>
+                            <option>Accident</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input id="incidentLocation" type="text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Severity</label>
+                        <select id="severity" required>
+                            <option value="">Select Severity</option>
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                            <option>Critical</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Reported By</label>
+                        <input id="reportedBy" type="text" readonly>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>Description</label>
+                        <textarea id="description" required></textarea>
+                    </div>
+                </div>
+
+                <button class="btn btn-danger" type="submit">Submit Incident</button>
+            </form>
+
+            <div id="incidentMessage" class="message"></div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">My Submitted Incidents</h2>
+            <div id="myIncidents" class="response-list"></div>
+        </div>
+    </section>
+
+    <!-- USER MODULE: RESOURCES -->
+    <section id="resourcesPage" class="page">
+        <div class="card">
+            <h2>📦 User Module - Relief Resources</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Resource</th>
+                            <th>Quantity</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resourceTable">
+                        <tr><td>Drinking Water</td><td>1200 Litres</td><td>Relief Center A</td><td><span class="status available">Available</span></td></tr>
+                        <tr><td>Food Packets</td><td>850</td><td>Relief Center B</td><td><span class="status available">Available</span></td></tr>
+                        <tr><td>First Aid Kits</td><td>120</td><td>Hospital Center</td><td><span class="status available">Available</span></td></tr>
+                        <tr><td>Blankets</td><td>300</td><td>Relief Center A</td><td><span class="status limited">Limited</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- USER MODULE: VOLUNTEERS -->
+    <section id="volunteersPage" class="page">
+        <div class="card">
+            <h2>🤝 User Module - Volunteers</h2>
+            <div class="volunteer-grid">
+                <div class="volunteer-card">
+                    <h3>Rahul Kumar</h3>
+                    <p>First Aid</p>
+                    <p>Vijayawada</p>
+                    <span class="status available">Available</span>
+                </div>
+                <div class="volunteer-card">
+                    <h3>Anjali Rao</h3>
+                    <p>Medical Support</p>
+                    <p>Guntur</p>
+                    <span class="status available">Available</span>
+                </div>
+                <div class="volunteer-card">
+                    <h3>Arjun Reddy</h3>
+                    <p>Rescue Operations</p>
+                    <p>Hyderabad</p>
+                    <span class="status deployed">Deployed</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ADMIN MODULE -->
+    <section id="adminPage" class="page">
+        <div class="card">
+            <h2>🛡️ Admin Module</h2>
+            <p>Admin can monitor users, incidents, resources and volunteers.</p>
+        </div>
+
+        <div class="admin-grid" style="margin-top:15px;">
+            <div class="admin-card">
+                <h3>Total Registered Users</h3>
+                <h2 id="totalUsers">0</h2>
+            </div>
+            <div class="admin-card">
+                <h3>Total Incidents</h3>
+                <h2 id="totalIncidents">0</h2>
+            </div>
+            <div class="admin-card">
+                <h3>Available Volunteers</h3>
+                <h2>155</h2>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:15px;">
+            <h2 class="section-title">Registered Users</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:15px;">
+            <h2 class="section-title">All Incident Reports</h2>
+            <div id="allIncidents" class="response-list"></div>
+        </div>
+
+        <div class="card" style="margin-top:15px;">
+            <h2 class="section-title">Admin Data Controls</h2>
+            <button class="btn btn-danger" onclick="clearIncidents()">Delete All Incident Reports</button>
+            <button class="btn btn-dark" onclick="clearUsers()">Delete All Registered Users</button>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <div class="footer-grid">
+        <div>
+            <h3>Disaster Management System</h3>
+            <p>Emergency coordination, incident reporting, relief resources and volunteer support.</p>
+        </div>
+        <div>
+            <h4>Quick Access</h4>
+            <button onclick="showPage('homePage')">Dashboard</button>
+            <button onclick="showPage('reportPage')">Report Incident</button>
+            <button onclick="showPage('resourcesPage')">Resources</button>
+            <button onclick="showPage('volunteersPage')">Volunteers</button>
+        </div>
+        <div>
+            <h4>Emergency Support</h4>
+            <p>🚨 Report critical incidents immediately.</p>
+            <p>📍 Check affected areas and resources.</p>
+            <p>🤝 Coordinate available volunteers.</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© 2026 Disaster Management System</span>
+        <span>Emergency Response & Relief Coordination</span>
+    </div>
+</footer>
+
+</div>
+
+<script>
+/* =========================================================
+   SDC REVIEW-1 DISASTER MANAGEMENT SYSTEM
+   Only HTML + CSS + JavaScript + Local Storage
+   ========================================================= */
+
+/* ---------- STORAGE ---------- */
+
+const USERS_KEY = "dms_users";
+const INCIDENTS_KEY = "dms_incidents";
+const SESSION_KEY = "dms_current_user";
+
+/* Create default admin account only if no users exist.
+   This is for classroom/demo use. */
+function initializeStorage() {
+    let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+
+    if (users.length === 0) {
+        users.push({
+            name: "System Admin",
+            email: "admin@dms.com",
+            password: "admin123",
+            role: "admin"
+        });
+        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+}
+
+/* ---------- AUTH NAVIGATION ---------- */
+
+function showSignup() {
+    document.getElementById("signupBox").classList.remove("hidden");
+    document.getElementById("loginBox").classList.add("hidden");
+}
+
+function showLogin() {
+    document.getElementById("signupBox").classList.add("hidden");
+    document.getElementById("loginBox").classList.remove("hidden");
+}
+
+/* ---------- SIGNUP ---------- */
+
+function signup() {
+    const name = document.getElementById("signupName").value.trim();
+    const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+    const password = document.getElementById("signupPassword").value;
+    const role = document.getElementById("signupRole").value;
+    const message = document.getElementById("signupMessage");
+
+    if (!name || !email || !password) {
+        message.textContent = "Please fill all fields.";
+        message.style.color = "red";
+        return;
+    }
+
+    if (password.length < 6) {
+        message.textContent = "Password must contain at least 6 characters.";
+        message.style.color = "red";
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+
+    const existingUser = users.find(user => user.email === email);
+
+    if (existingUser) {
+        message.textContent = "This email is already registered.";
+        message.style.color = "red";
+        return;
+    }
+
+    users.push({
+        name: name,
+        email: email,
+        password: password,
+        role: role
+    });
+
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+
+    message.textContent = "Signup successful. You can now login.";
+    message.style.color = "green";
+
+    document.getElementById("signupName").value = "";
+    document.getElementById("signupEmail").value = "";
+    document.getElementById("signupPassword").value = "";
+
+    setTimeout(showLogin, 800);
+}
+
+/* ---------- LOGIN ---------- */
+
+function login() {
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const password = document.getElementById("loginPassword").value;
+    const message = document.getElementById("loginMessage");
+
+    const users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+
+    const user = users.find(
+        u => u.email === email && u.password === password
+    );
+
+    if (!user) {
+        message.textContent = "Invalid email or password.";
+        message.style.color = "red";
+        return;
+    }
+
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+
+    openApplication(user);
+}
+
+/* ---------- OPEN APPLICATION ---------- */
+
+function openApplication(user) {
+    document.getElementById("authPage").classList.add("hidden");
+    document.getElementById("appPage").classList.remove("hidden");
+
+    document.getElementById("loggedUser").textContent =
+        user.name + " (" + user.email + ")";
+
+    document.getElementById("loggedRole").textContent =
+        "Role: " + user.role.toUpperCase();
+
+    document.getElementById("reportedBy").value = user.name;
+
+    buildNavigation(user.role);
+    loadDashboard();
+    loadMyIncidents();
+}
+
+/* ---------- ROLE-BASED NAVIGATION ---------- */
+
+function buildNavigation(role) {
+    const nav = document.getElementById("navigation");
+
+    let links = `
+        <button onclick="showPage('homePage')" class="active">Dashboard</button>
+        <button onclick="showPage('reportPage')">Report Incident</button>
+        <button onclick="showPage('resourcesPage')">Resources</button>
+        <button onclick="showPage('volunteersPage')">Volunteers</button>
+    `;
+
+    if (role === "admin") {
+        links += `<button onclick="showPage('adminPage')">Admin Module</button>`;
+    }
+
+    nav.innerHTML = links;
+}
+
+/* ---------- MODULE-WISE REDIRECTION ---------- */
+
+function showPage(pageId) {
+    document.querySelectorAll(".page").forEach(page => {
+        page.classList.remove("active");
+    });
+
+    const page = document.getElementById(pageId);
+
+    if (page) {
+        page.classList.add("active");
+    }
+
+    document.querySelectorAll("nav button").forEach(button => {
+        button.classList.remove("active");
+    });
+
+    const buttons = document.querySelectorAll("nav button");
+    buttons.forEach(button => {
+        if (button.getAttribute("onclick") &&
+            button.getAttribute("onclick").includes(pageId)) {
+            button.classList.add("active");
+        }
+    });
+
+    if (pageId === "adminPage") {
+        loadAdminData();
+    }
+}
+
+/* ---------- INCIDENT MODULE ---------- */
+
+document.getElementById("incidentForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const type = document.getElementById("incidentType").value;
+    const location = document.getElementById("incidentLocation").value.trim();
+    const severity = document.getElementById("severity").value;
+    const description = document.getElementById("description").value.trim();
+
+    const currentUser = JSON.parse(localStorage.getItem(SESSION_KEY));
+
+    if (!currentUser) {
+        alert("Please login first.");
+        return;
+    }
+
+    let incidents = JSON.parse(localStorage.getItem(INCIDENTS_KEY)) || [];
+
+    const incident = {
+        id: Date.now(),
+        type: type,
+        location: location,
+        severity: severity,
+        description: description,
+        reportedBy: currentUser.name,
+        email: currentUser.email,
+        date: new Date().toLocaleString()
+    };
+
+    incidents.push(incident);
+
+    localStorage.setItem(INCIDENTS_KEY, JSON.stringify(incidents));
+
+    document.getElementById("incidentMessage").textContent =
+        "Incident submitted successfully.";
+    document.getElementById("incidentMessage").style.color = "green";
+
+    this.reset();
+    document.getElementById("reportedBy").value = currentUser.name;
+
+    loadDashboard();
+    loadMyIncidents();
+});
+
+/* ---------- DISPLAY USER INCIDENTS ---------- */
+
+function loadMyIncidents() {
+    const container = document.getElementById("myIncidents");
+    const currentUser = JSON.parse(localStorage.getItem(SESSION_KEY));
+
+    if (!currentUser) return;
+
+    const incidents = JSON.parse(localStorage.getItem(INCIDENTS_KEY)) || [];
+
+    const mine = incidents.filter(i => i.email === currentUser.email);
+
+    if (mine.length === 0) {
+        container.innerHTML = "<p>No incidents submitted yet.</p>";
+        return;
+    }
+
+    container.innerHTML = mine.map(i => `
+        <div class="response-item">
+            <strong>${escapeHTML(i.type)}</strong>
+            <p>Location: ${escapeHTML(i.location)}</p>
+            <p>Severity: ${escapeHTML(i.severity)}</p>
+            <p>Description: ${escapeHTML(i.description)}</p>
+            <small>${escapeHTML(i.date)}</small>
+        </div>
+    `).join("");
+}
+
+/* ---------- ADMIN MODULE ---------- */
+
+function loadAdminData() {
+    const users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+    const incidents = JSON.parse(localStorage.getItem(INCIDENTS_KEY)) || [];
+
+    document.getElementById("totalUsers").textContent = users.length;
+    document.getElementById("totalIncidents").textContent = incidents.length;
+
+    const userTable = document.getElementById("userTable");
+
+    userTable.innerHTML = users.map(user => `
+        <tr>
+            <td>${escapeHTML(user.name)}</td>
+            <td>${escapeHTML(user.email)}</td>
+            <td>${escapeHTML(user.role)}</td>
+        </tr>
+    `).join("");
+
+    const allIncidents = document.getElementById("allIncidents");
+
+    if (incidents.length === 0) {
+        allIncidents.innerHTML = "<p>No incident reports available.</p>";
+        return;
+    }
+
+    allIncidents.innerHTML = incidents.map(i => `
+        <div class="response-item">
+            <strong>${escapeHTML(i.type)}</strong>
+            <p>Location: ${escapeHTML(i.location)}</p>
+            <p>Severity: ${escapeHTML(i.severity)}</p>
+            <p>Reported By: ${escapeHTML(i.reportedBy)}</p>
+            <p>${escapeHTML(i.description)}</p>
+            <small>${escapeHTML(i.date)}</small>
+        </div>
+    `).join("");
+}
+
+/* ---------- DASHBOARD ---------- */
+
+function loadDashboard() {
+    const incidents = JSON.parse(localStorage.getItem(INCIDENTS_KEY)) || [];
+    document.getElementById("incidentCount").textContent = incidents.length;
+}
+
+/* ---------- ADMIN DELETE FUNCTIONS ---------- */
+
+function clearIncidents() {
+    if (confirm("Delete all incident reports?")) {
+        localStorage.removeItem(INCIDENTS_KEY);
+        loadDashboard();
+        loadAdminData();
+        loadMyIncidents();
+        alert("All incident reports deleted.");
+    }
+}
+
+function clearUsers() {
+    if (confirm("Delete all registered users? The default admin will be restored.")) {
+        localStorage.removeItem(USERS_KEY);
+        initializeStorage();
+        loadAdminData();
+        alert("Registered users deleted.");
+    }
+}
+
+/* ---------- LOGOUT ---------- */
+
+function logout() {
+    localStorage.removeItem(SESSION_KEY);
+
+    document.getElementById("appPage").classList.add("hidden");
+    document.getElementById("authPage").classList.remove("hidden");
+
+    document.getElementById("loginEmail").value = "";
+    document.getElementById("loginPassword").value = "";
+    document.getElementById("loginMessage").textContent = "";
+
+    showLogin();
+}
+
+/* ---------- BASIC HTML SAFETY ---------- */
+
+function escapeHTML(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+/* ---------- PAGE LOAD ---------- */
+
+initializeStorage();
+
+const savedSession = localStorage.getItem(SESSION_KEY);
+
+if (savedSession) {
+    openApplication(JSON.parse(savedSession));
+} else {
+    showSignup();
+}
+</script>
+
+</body>
+</html>
